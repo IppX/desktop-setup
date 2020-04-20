@@ -1,0 +1,20 @@
+---
+  - name: Desktop setup
+    hosts: localhost
+    vars:
+      secret_path: "{{ playbook_dir }}/secret"
+    roles:
+     - role: 00-install-software
+       become: yes
+       tags: 'install-software'
+     - role: 01-configure-desktop
+       tags: 'configure-desktop'
+     - role: 02-setup-home
+       tags: 'setup-home'
+     - role: 03-dev-tools
+       tags: 'dev-tools'
+     - role: 04-cloud-tools
+       tags: 'cloud-tools'
+     - role: 05-other-tools
+       tags: 'other-tools'
+

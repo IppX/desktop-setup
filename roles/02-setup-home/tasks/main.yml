@@ -1,0 +1,27 @@
+- name: "Create extra directories"
+  file:
+    path: "{{ ansible_env['HOME'] }}/{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - software
+    - playground
+    - github
+    - projects
+  
+- name: "Customize bash"
+  copy: src=../files/bash/.bash_profile dest={{ ansible_env['HOME'] }}/.bash_profile
+
+- name: "Load bash_profile on bash startup"
+  blockinfile:
+    block: |
+      if [ -f ~/.bash_profile ]; then
+        . ~/.bash_profile
+      fi
+    path: "{{ ansible_env['HOME'] }}/.bashrc"
+
+- name: "Add ssh config"
+  copy: src=../files/.ssh dest={{ ansible_env['HOME'] }}
+
+- name: "Add ssh private key"
+  copy: src={{ secret_path }}/ssh/ dest={{ ansible_env['HOME'] }}/.ssh/

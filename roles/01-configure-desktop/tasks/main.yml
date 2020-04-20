@@ -1,0 +1,38 @@
+- name: "Set i3 as default WM for mate"
+  dconf: key={{ item['key'] }} value={{ item['val'] | string }} state=present
+  with_items:
+  - key: /org/mate/desktop/session/required-components/windowmanager
+    val: "'i3'" # default is 'mint-window-manager'
+  - key: /org/mate/desktop/background/show-desktop-icons
+    val: "false" # default is true
+  - key: /org/mate/desktop/session/required-components-list
+    val: "['windowmanager', 'panel', 'dock']" # default is ['windowmanager', 'panel', 'filemanager', 'dock']
+  - key: /com/linuxmint/mintmenu/hot-key
+    val: "''" # default "'Super+L'" this enables proper key binding on left win key for i3 otherwise mintmenu takes precedence
+
+- name: "Create i3 config folder"
+  file: path={{ ansible_env['HOME'] }}/.config/i3 state='directory' mode='0755'
+
+- name: "Replace i3 config"
+  copy: src=../conf/i3/config dest={{ ansible_env['HOME'] }}/.config/i3/config
+
+- name: "Customize desktop preferences"
+  dconf: key={{ item['key'] }} value={{ item['val'] | string }} state=present
+  with_items:
+  - key: /org/mate/caja/preferences/default-folder-viewer
+    val: "'list-view'" # default is 'icon-view'
+  - key: /org/mate/caja/preferences/show-hidden-files
+    val: "true" # default is 'false'
+  - key: /org/mate/desktop/interface
+    val: "'Mint-Y-Dark'"
+
+- name: "Add backintime backup config"
+  template:
+    src: ../conf/backintime/config.j2
+    dest: "{{ ansible_env['HOME'] }}/.config/backintime/config"
+
+- name: "Add timeshift backup config"
+  become: yes
+  template:
+    src: ../conf/timeshift/timeshift.json.j2
+    dest: /etc/timeshift.json

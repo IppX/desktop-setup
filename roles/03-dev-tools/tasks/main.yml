@@ -1,0 +1,36 @@
+- name: "Downloading Idea"
+  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
+  with_items:
+  - url: https://download-cf.jetbrains.com/idea/ideaIU-2020.1.tar.gz
+    dest: "/tmp/idea.tar.gz"
+
+- name: "Installing Idea 1/2"
+  file:
+    path: "{{ ansible_env['HOME'] }}/software/idea"
+    state: directory
+
+- name: "Installing Idea 2/2"
+  unarchive:
+    remote_src: yes
+    src: "/tmp/idea.tar.gz"
+    dest: "{{ ansible_env['HOME'] }}/software/idea"
+    extra_opts:
+      - --strip-components=1
+
+- name: "Symlink for Idea"
+  become: yes
+  file:
+    src: "{{ ansible_env['HOME'] }}/software/idea/bin/idea.sh"
+    dest: /usr/local/bin/idea
+    state: link
+
+- name: "Downloading hugo"
+  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
+  with_items:
+    - url: https://github.com/gohugoio/hugo/releases/download/v0.69.0/hugo_0.69.0_Linux-64bit.deb
+      dest: "/tmp/hugo.deb"
+
+- name: "Installing hugo"
+  become: yes
+  apt: deb=/tmp/hugo.deb state=present
+

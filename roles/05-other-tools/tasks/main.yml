@@ -1,0 +1,30 @@
+- name: "Downloading yEd"
+  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0755
+  with_items:
+  - url: https://www.yworks.com/resources/yed/demo/yEd-3.19.1.1_with-JRE13_64-bit_setup.sh
+    dest: "/tmp/yed.sh"
+
+- name: "Installing yEd"
+  command: "/tmp/yed.sh"
+
+- name: "Configure yEd 1/3"
+  copy: src=../files/yEd/palettes/ dest={{ ansible_env['HOME'] }}/.yEd/palettes/
+
+- name: "Configuring yEd 2/3"
+  blockinfile:
+    block: |
+      <palette.section palette.id="SPECIFICATIONS" palette.visibility="true"/>
+      <palette.section palette.id="ARCHI" palette.visibility="true"/>
+    path: "{{ ansible_env['HOME'] }}/.yEd/palettes/palette_info.xml"
+    insertbefore: "</palette.information>"
+  ignore_errors: yes
+
+- name: "Configuring yEd 3/3"
+  copy: src=../files/yEd/settings.xml dest={{ ansible_env['HOME'] }}/.yEd/settings.xml
+
+- name: "Symlink for yEd"
+  become: yes
+  file:
+    src: "{{ ansible_env['HOME'] }}/software/yEd/yEd"
+    dest: /usr/local/bin/yEd
+    state: link

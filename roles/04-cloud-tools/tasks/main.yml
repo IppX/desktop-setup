@@ -1,0 +1,102 @@
+- name: "Create cloud tools directory"
+  file: path={{ cloud_tools_path }} state=directory mode=0755
+
+- name: "Installing binary tools"
+  get_url: url={{ item['url'] }} dest={{ cloud_tools_path }}/{{ item['name'] }} mode=0755 checksum={{ item['checksum']|default('') }} force=yes
+  loop: "{{ tools['binaries'] }}"
+
+- name: "Create archive folder"
+  file: path={{ cloud_tools_path }}/archives state=directory mode=0755
+
+- name: "Downloading archived tools"
+  get_url: url={{ item['url'] }} dest={{ cloud_tools_path }}/archives/{{ item['name'] }}.{{ item['format'] }} mode=0644 checksum={{ item['checksum']|default('') }} force=yes
+  loop: "{{ tools['archives'] }}"
+
+- name: "Unarchive gcloud"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/gcloud.tar.gz"
+    dest: "{{ cloud_tools_path }}/"
+
+- name: "Install gcloud"
+  command: "{{ cloud_tools_path }}/google-cloud-sdk/install.sh --usage-reporting=true --path-update=true --bash-completion=true --rc-path={{ ansible_env['HOME'] }}/.bash_profile --additional-components app alpha beta"
+
+- name: "Installing helm"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/helm.tar.gz"
+    dest: "{{ cloud_tools_path }}/"
+    exclude:
+    - "{{ os }}-amd64/LICENSE"
+    - "{{ os }}-amd64/README.md"
+    extra_opts:
+    - --strip-components=1
+
+- name: "Create a dir for kubectx"
+  file: path={{ cloud_tools_path }}/archives/kubectx state=directory mode=0755
+
+- name: "Unarchive kubectx"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/kubectx.tar.gz"
+    dest: "{{ cloud_tools_path }}/archives/kubectx"
+    mode: 0755
+    extra_opts:
+      - --strip-components=1
+
+- name: "Extract kubectx binaries"
+  command: mv {{ cloud_tools_path }}/archives/kubectx/kubectx {{ cloud_tools_path }}/archives/kubectx/kubens {{ cloud_tools_path }}/
+
+- name: "Create a dir for kubeps1"
+  file: path={{ cloud_tools_path }}/archives/kubeps1 state=directory mode=0755
+
+- name: "Unarchive kubeps1"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/kubeps1.tar.gz"
+    dest: "{{ cloud_tools_path }}/archives/kubeps1"
+    extra_opts:
+      - --strip-components=1
+
+- name: "Extract kubeps1 binaries"
+  command: mv {{ cloud_tools_path }}/archives/kubeps1/kube-ps1.sh {{ cloud_tools_path }}/
+
+- name: "Add kubeps1 customization"
+  copy: src=../files/custom-ps1.sh dest={{ cloud_tools_path }}/
+
+- name: "Installing vault"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/vault.zip"
+    dest: "{{ cloud_tools_path }}/"
+    mode: 0755
+
+- name: "Installing terraform"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/terraform.zip"
+    dest: "{{ cloud_tools_path }}/"
+    mode: 0755
+
+- name: "Update bashprofile"
+  blockinfile:
+    path: "{{ ansible_env['HOME'] }}/.bash_profile"
+    block: |
+      export PATH="{{ cloud_tools_path }}:$PATH"
+      source {{ cloud_tools_path }}/kube-ps1.sh; source {{ cloud_tools_path }}/custom-ps1.sh; PS1="\$(kube_ps1)$PS1";
+    marker_begin: "CLOUD TOOLS BEGIN"
+    marker_end: "CLOUD TOOLS END"
+
+- name: "Cleanup archives"
+  file: path={{ cloud_tools_path }}/archives state=absent
+
+- name: "Install bash completions"
+  become: yes
+  args:
+    executable: /bin/bash
+  shell: |
+    set -e;
+    source {{ ansible_env['HOME'] }}/.bash_profile;
+    kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null;
+    minikube completion bash | sudo tee /etc/bash_completion.d/minikube > /dev/null;
+    helm completion bash | sudo tee /etc/bash_completion.d/helm > /dev/null;
