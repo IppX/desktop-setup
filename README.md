@@ -1,10 +1,10 @@
 # Desktop setup automation for Linux Mint
 
-Sets up and configures a desktop workstation to get up and running within minutes.
+Sets up and configures a linux mint based computer in minutes.
 
 ## Requirements
 
-- Linux Mint Tricia 19.3 Mate Edition
+- Installed Linux Mint Tricia 19.3 Mate Edition
 - ansible 2.5.x
 
 ## What does it do?
@@ -17,10 +17,10 @@ This repository contains the following ansible roles
   - configure backups
 - __setup home__: personalizes home directory and bash
 - __dev tools__: installs additional software for development usage (i.e. IDE)
-- __cloud tools__: installs a set of cloud tools to operate and develop with kubernetes. See [the full list](./roles/04-cloud-tools/defaults/main.yml#L18)
-- __other tools__: installs miscelanious software
+- __cloud tools__: installs a set of cloud tools to operate and develop with kubernetes. See [the full list](./roles/04-cloud-tools/defaults/main.yml#L5).
+- __other tools__: installs miscellaneous software
 
-## To run it
+## Run it
 
 ```bash
 ./install.sh
