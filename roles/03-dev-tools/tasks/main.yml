@@ -34,3 +34,13 @@
   become: yes
   apt: deb=/tmp/hugo.deb state=present
 
+- name: "Downloading golang"
+  vars:
+    go_version: 1.14.2
+  get_url: url=https://dl.google.com/go/go{{ go_version }}.linux-amd64.tar.gz dest=/tmp/go.tar.gz
+
+- name: "Unpacking golang"
+  unarchive:
+    remote_src: yes
+    src: "/tmp/go.tar.gz"
+    dest: "{{ ansible_env['HOME'] }}/software/"
