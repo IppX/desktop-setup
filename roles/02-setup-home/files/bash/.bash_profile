@@ -2,7 +2,8 @@ export HISTSIZE=10000
 export HISTFILESIZE=10000
 
 export PATH=$HOME/go/bin:$PATH
-export PATH=$PATH:$HOME/software/go/bin
+export PATH=$HOME/software/go/bin:$PATH
+export PATH=$HOME/.local/bin:$PATH
 #export PATH="/snap/bin:$PATH"
 
 export ANSIBLE_NOCOWS=1

@@ -96,7 +96,6 @@
     executable: /bin/bash
   shell: |
     set -e;
-    source {{ ansible_env['HOME'] }}/.bash_profile;
-    kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null;
-    minikube completion bash | sudo tee /etc/bash_completion.d/minikube > /dev/null;
-    helm completion bash | sudo tee /etc/bash_completion.d/helm > /dev/null;
+    {{ cloud_tools_path }}/kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null;
+    {{ cloud_tools_path }}/minikube completion bash | sudo tee /etc/bash_completion.d/minikube > /dev/null;
+    {{ cloud_tools_path }}/helm completion bash | sudo tee /etc/bash_completion.d/helm > /dev/null;

@@ -26,6 +26,12 @@
   - key: /org/mate/desktop/interface
     val: "'Mint-Y-Dark'"
 
+- name: "Create backintime config folder"
+  file:
+    path: "{{ ansible_env['HOME'] }}/.config/backintime"
+    state: directory
+    mode: '0755'
+
 - name: "Add backintime backup config"
   template:
     src: ../conf/backintime/config.j2

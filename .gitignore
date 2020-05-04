@@ -2,3 +2,5 @@ secret/
 .idea/
 *.iml
 *.retry
+.venv
+.vagrant

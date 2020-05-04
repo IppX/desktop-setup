@@ -25,3 +25,10 @@ This repository contains the following ansible roles
 ```bash
 ./install.sh
 ```
+
+## Run tests
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
