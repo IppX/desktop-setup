@@ -23,5 +23,11 @@
 - name: "Add ssh config"
   copy: src=../files/.ssh dest={{ ansible_env['HOME'] }}
 
-- name: "Add ssh private key"
-  copy: src={{ secret_path }}/ssh/ dest={{ ansible_env['HOME'] }}/.ssh/
+- name: "Create github ssh key"
+  args:
+    executable: /bin/bash
+    creates: "{{ ansible_env['HOME'] }}/.ssh/id_github"
+  shell: |
+    set -e;
+    ssh-keygen -t rsa -b 4096 -f {{ ansible_env['HOME'] }}/.ssh/id_github -N '' -q -C "{{ email }}"
+    ssh-add {{ ansible_env['HOME'] }}/.ssh/id_github

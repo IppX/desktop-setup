@@ -34,6 +34,7 @@
     packages:
     # system and helpers
     - i3-wm
+    - dmenu
     - htop
     - pavucontrol
     - python3-s-tui

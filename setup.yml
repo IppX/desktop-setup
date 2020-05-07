@@ -2,7 +2,7 @@
   - name: Desktop setup
     hosts: localhost
     vars:
-      secret_path: "{{ playbook_dir }}/secret"
+      email: "my@email.com"
     roles:
      - role: 00-install-software
        become: yes
