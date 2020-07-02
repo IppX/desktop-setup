@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   # https://docs.vagrantup.com.
 
   # Custom box created from mint 19 iso image
-  config.vm.box = "mint19_3mate"
+  config.vm.box = "mint20"
   #config.vm.base_mac = "080027932970"
 
   config.vm.provider "virtualbox" do |v|

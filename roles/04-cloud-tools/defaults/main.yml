@@ -4,16 +4,16 @@ os: linux
 
 versions:
   gcloud: 289.0.0
-  helm: v3.1.2
+  helm: v3.2.4
   kubectl: v1.18.0
-  kubectx: v0.8.0
+  kubectx: v0.9.1
   kubeps1: v0.7.0
-  minikube: v1.9.2
+  minikube: v1.11.0
   mkcert: v1.4.1
   stern: 1.11.0
   spruce: v1.25.2
-  terraform: 0.12.24
-  vault: 1.4.0
+  terraform: 0.12.28
+  vault: 1.4.2
 
 tools:
   binaries:
@@ -21,7 +21,7 @@ tools:
     url: "https://storage.googleapis.com/kubernetes-release/release/{{ versions['kubectl'] }}/bin/{{ os }}/amd64/kubectl"
   - name: minikube
     url: "https://storage.googleapis.com/minikube/releases/{{ versions['minikube'] }}/minikube-{{ os }}-amd64"
-    checksum: "sha256:3121f933bf8d608befb24628a045ce536658738c14618504ba46c92e656ea6b5"
+    checksum: "sha256:0b07a295d5110dc70907e4660429b8f9b3e8c05119e42f73e192b5313695a913"
   - name: mkcert
     url: "https://github.com/FiloSottile/mkcert/releases/download/{{ versions['mkcert'] }}/mkcert-{{ versions['mkcert'] }}-{{ os }}-amd64"
   - name: spruce
@@ -35,10 +35,13 @@ tools:
       url: "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-{{ versions['gcloud'] }}-{{ os }}-x86_64.tar.gz"
       format: tar.gz
       checksum: "sha256:3ee929cb236cc3a0c1d30dba514df198951f13681523bb3149ac6eb28af46443"
+    - name: aws
+      url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+      format: zip
     - name: helm
       url: "https://get.helm.sh/helm-{{ versions['helm'] }}-{{ os }}-amd64.tar.gz"
       format: tar.gz
-      checksum: "sha256:e6be589df85076108c33e12e60cfb85dcd82c5d756a6f6ebc8de0ee505c9fd4c"
+      checksum: "sha256:8eb56cbb7d0da6b73cd8884c6607982d0be8087027b8ded01d6b2759a72e34b1"
     - name: kubectx
       url: "https://github.com/ahmetb/kubectx/archive/{{ versions['kubectx'] }}.tar.gz"
       format: tar.gz
@@ -48,8 +51,8 @@ tools:
     - name: terraform
       url: "https://releases.hashicorp.com/terraform/{{ versions['terraform'] }}/terraform_{{ versions['terraform'] }}_{{ os }}_amd64.zip"
       format: zip
-      checksum: "sha256:602d2529aafdaa0f605c06adb7c72cfb585d8aa19b3f4d8d189b42589e27bf11"
+      checksum: "sha256:be99da1439a60942b8d23f63eba1ea05ff42160744116e84f46fc24f1a8011b6"
     - name: vault
       url: "https://releases.hashicorp.com/vault/{{ versions['vault'] }}/vault_{{ versions['vault'] }}_{{ os }}_amd64.zip"
       format: zip
-      checksum: "sha256:8f739c4850bab35e971e27c8120908f48f247b07717d19aabad1110e9966cded"
+      checksum: "sha256:f2bca89cbffb8710265eb03bc9452cc316b03338c411ba8453ffe7419390b8f1"

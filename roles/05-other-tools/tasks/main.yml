@@ -1,7 +1,7 @@
 - name: "Downloading yEd"
   get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0755
   with_items:
-  - url: https://www.yworks.com/resources/yed/demo/yEd-3.19.1.1_with-JRE13_64-bit_setup.sh
+  - url: https://www.yworks.com/resources/yed/demo/yEd-3.20_with-JRE14_64-bit_setup.sh
     dest: "/tmp/yed.sh"
 
 - name: "Installing yEd"
