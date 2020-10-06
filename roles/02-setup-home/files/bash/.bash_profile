@@ -1,5 +1,6 @@
 export HISTSIZE=10000
 export HISTFILESIZE=10000
+export HISTTIMEFORMAT="%d/%m/%y %T "
 
 export PATH=$HOME/go/bin:$PATH
 export PATH=$HOME/software/go/bin:$PATH
