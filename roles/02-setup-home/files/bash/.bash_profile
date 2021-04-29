@@ -11,6 +11,14 @@ export ANSIBLE_NOCOWS=1
 #export VAGRANT_DEFAULT_PROVIDER=libvirt
 
 alias ll='ls -lha'
+alias dig='dig +noall +answer +ttlunits'
+
+function git_prune() {
+	git fetch -p
+	for branch in $(git branch -vv | grep ': gone]' | awk '{print $1}'); do 
+		git branch -D $branch; 
+	done;
+}
 
 # kubernetes helpers
 alias kafkapod='kubectl run --generator=run-pod/v1 kafkacat --rm -i --tty --namespace default  --image confluentinc/cp-kafkacat --command -- bash'
