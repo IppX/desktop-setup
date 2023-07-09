@@ -1,38 +1,95 @@
-- name: "Downloading Idea"
-  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
+#- name: "Downloading Idea"
+#  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
+#  with_items:
+#  - url: https://download-cf.jetbrains.com/idea/ideaIU-2020.1.tar.gz
+#    dest: "/tmp/idea.tar.gz"
+#
+#- name: "Installing Idea 1/2"
+#  file:
+#    path: "{{ ansible_env['HOME'] }}/software/idea"
+#    state: directory
+#
+#- name: "Installing Idea 2/2"
+#  unarchive:
+#    remote_src: yes
+#    src: "/tmp/idea.tar.gz"
+#    dest: "{{ ansible_env['HOME'] }}/software/idea"
+#    extra_opts:
+#      - --strip-components=1
+#
+#- name: "Symlink for Idea"
+#  become: yes
+#  file:
+#    src: "{{ ansible_env['HOME'] }}/software/idea/bin/idea.sh"
+#    dest: /usr/local/bin/idea
+#    state: link
+
+- name: "Getting deb packages"
+  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644 timeout=20
   with_items:
-  - url: https://download-cf.jetbrains.com/idea/ideaIU-2020.1.tar.gz
-    dest: "/tmp/idea.tar.gz"
+    - url: https://downloads.slack-edge.com/linux_releases/slack-desktop-4.4.2-amd64.deb
+      dest: /tmp/slack.deb
+    - url: https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+      dest: /tmp/session-manager-plugin.deb
 
-- name: "Installing Idea 1/2"
-  file:
-    path: "{{ ansible_env['HOME'] }}/software/idea"
-    state: directory
-
-- name: "Installing Idea 2/2"
-  unarchive:
-    remote_src: yes
-    src: "/tmp/idea.tar.gz"
-    dest: "{{ ansible_env['HOME'] }}/software/idea"
-    extra_opts:
-      - --strip-components=1
-
-- name: "Symlink for Idea"
-  become: yes
-  file:
-    src: "{{ ansible_env['HOME'] }}/software/idea/bin/idea.sh"
-    dest: /usr/local/bin/idea
-    state: link
-
-- name: "Downloading hugo"
-  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
+- name: "Installing deb packages"
+  apt: deb={{ item }} state=present
   with_items:
-    - url: https://github.com/gohugoio/hugo/releases/download/v0.69.0/hugo_0.69.0_Linux-64bit.deb
-      dest: "/tmp/hugo.deb"
+    - /tmp/slack.deb
+    - /tmp/session-manager-plugin.deb
 
-- name: "Installing hugo"
-  become: yes
-  apt: deb=/tmp/hugo.deb state=present
+- name: "Adding keys for non public programs"
+  apt_key: url={{ item }} state=present
+  with_items:
+    - https://download.docker.com/linux/ubuntu/gpg
+
+- name: "Adding repos for non public programs"
+  apt_repository: repo={{ item }} codename=bionic state=present
+  with_items:
+    - deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+
+- name: "Installing dev packages"
+  apt: pkg={{ packages }} state=present update_cache=yes
+  vars:
+    packages:
+      # must have
+      - git
+      - vim
+      - jq
+      - nmap
+      - wireshark
+
+      # java
+      - openjdk-11-jdk
+      - maven
+      - gradle
+
+      # php
+      - php-cli
+
+      # python
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-setuptools
+
+      # virtualization
+      - virtualbox
+      - virtualbox-guest-additions-iso
+      - virtualbox-qt
+      - vagrant
+
+      # docker
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+- name: "Create Docker group"
+  group: name=docker state=present
+
+# todo fix version here
+- name: "Add current user to Docker group"
+  user: name="{{ ansible_env['USER'] }}" groups=docker append=yes
 
 - name: "Downloading golang"
   vars:
