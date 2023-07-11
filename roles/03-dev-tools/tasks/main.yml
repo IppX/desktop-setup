@@ -1,33 +1,36 @@
-#- name: "Downloading Idea"
-#  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
-#  with_items:
-#  - url: https://download-cf.jetbrains.com/idea/ideaIU-2020.1.tar.gz
-#    dest: "/tmp/idea.tar.gz"
-#
-#- name: "Installing Idea 1/2"
-#  file:
-#    path: "{{ ansible_env['HOME'] }}/software/idea"
-#    state: directory
-#
-#- name: "Installing Idea 2/2"
-#  unarchive:
-#    remote_src: yes
-#    src: "/tmp/idea.tar.gz"
-#    dest: "{{ ansible_env['HOME'] }}/software/idea"
-#    extra_opts:
-#      - --strip-components=1
-#
-#- name: "Symlink for Idea"
-#  become: yes
-#  file:
-#    src: "{{ ansible_env['HOME'] }}/software/idea/bin/idea.sh"
-#    dest: /usr/local/bin/idea
-#    state: link
+- name: "Create cloud tools directory"
+  file: path="{{ ansible_env['HOME'] }}/software" state=directory mode=0755
+
+- name: "Downloading Idea"
+  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644
+  with_items:
+  - url: https://download-cdn.jetbrains.com/idea/ideaIU-{{ versions['idea'] }}.tar.gz
+    dest: "/tmp/idea.tar.gz"
+
+- name: "Installing Idea 1/2"
+  file:
+    path: "{{ ansible_env['HOME'] }}/software/idea"
+    state: directory
+
+- name: "Installing Idea 2/2"
+  unarchive:
+    remote_src: yes
+    src: "/tmp/idea.tar.gz"
+    dest: "{{ ansible_env['HOME'] }}/software/idea"
+    extra_opts:
+      - --strip-components=1
+
+- name: "Symlink for Idea"
+  become: yes
+  file:
+    src: "{{ ansible_env['HOME'] }}/software/idea/bin/idea.sh"
+    dest: /usr/local/bin/idea
+    state: link
 
 - name: "Getting deb packages"
   get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644 timeout=20
   with_items:
-    - url: https://downloads.slack-edge.com/linux_releases/slack-desktop-4.4.2-amd64.deb
+    - url: "https://downloads.slack-edge.com/releases/{{ os }}/{{ versions['slack'] }}/prod/x64/slack-desktop-{{ versions['slack'] }}-{{ arch }}.deb"
       dest: /tmp/slack.deb
     - url: https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
       dest: /tmp/session-manager-plugin.deb
@@ -37,16 +40,19 @@
   with_items:
     - /tmp/slack.deb
     - /tmp/session-manager-plugin.deb
+  become: yes
 
 - name: "Adding keys for non public programs"
   apt_key: url={{ item }} state=present
   with_items:
     - https://download.docker.com/linux/ubuntu/gpg
+  become: yes
 
 - name: "Adding repos for non public programs"
   apt_repository: repo={{ item }} codename=bionic state=present
   with_items:
     - deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+  become: yes
 
 - name: "Installing dev packages"
   apt: pkg={{ packages }} state=present update_cache=yes
@@ -83,18 +89,18 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
+  become: yes
 
 - name: "Create Docker group"
   group: name=docker state=present
+  become: yes
 
-# todo fix version here
 - name: "Add current user to Docker group"
   user: name="{{ ansible_env['USER'] }}" groups=docker append=yes
+  become: yes
 
 - name: "Downloading golang"
-  vars:
-    go_version: 1.14.2
-  get_url: url=https://dl.google.com/go/go{{ go_version }}.linux-amd64.tar.gz dest=/tmp/go.tar.gz
+  get_url: url=https://dl.google.com/go/go{{ versions['go'] }}.{{ os }}-{{ arch }}.tar.gz dest=/tmp/go.tar.gz
 
 - name: "Unpacking golang"
   unarchive:

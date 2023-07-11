@@ -38,9 +38,7 @@ tools:
     url: "https://github.com/FiloSottile/mkcert/releases/download/{{ versions['mkcert'] }}/mkcert-{{ versions['mkcert'] }}-{{ os }}-{{ arch }}"
   - name: spruce
     url: "https://github.com/geofffranks/spruce/releases/download/{{ versions['spruce'] }}/spruce-{{ os }}-{{ arch }}"
-  - name: stern
-    url: "https://github.com/stern/stern/releases/download/{{ versions['stern'] }}/stern_{{ os }}_{{ arch }}"
-#    checksum: "sha256:e0b39dc26f3a0c7596b2408e4fb8da533352b76aaffdc18c7ad28c833c9eb7db"
+  #    checksum: "sha256:e0b39dc26f3a0c7596b2408e4fb8da533352b76aaffdc18c7ad28c833c9eb7db"
   - name: cht.sh
     url: "https://cht.sh/:cht.sh"
   - name: docker-compose
@@ -73,7 +71,7 @@ tools:
       format: zip
 #      checksum: "sha256:f2bca89cbffb8710265eb03bc9452cc316b03338c411ba8453ffe7419390b8f1"
     - name: rbac-lookup
-      url: "https://github.com/FairwindsOps/rbac-lookup/releases/download/v{{ versions['rbac-lookup'] }}/rbac-lookup_{{ versions['rbac-lookup'] }}_{{ os | capitalize }}_{{ arch }}.tar.gz"
+      url: "https://github.com/FairwindsOps/rbac-lookup/releases/download/v{{ versions['rbac-lookup'] }}/rbac-lookup_{{ versions['rbac-lookup'] }}_{{ os | capitalize }}_{{ arch_alt }}.tar.gz"
       format: tar.gz
     - name: steampipe
       url: "https://github.com/turbot/steampipe/releases/download/{{ versions['steampipe'] }}/steampipe_{{ os }}_{{ arch }}.tar.gz"
@@ -89,4 +87,7 @@ tools:
       format: tar.gz
     - name: amtool
       url: "https://github.com/prometheus/alertmanager/releases/download/v{{ versions['amtool'] }}/alertmanager-{{ versions['amtool'] }}.{{ os }}-{{ arch }}.tar.gz"
+      format: tar.gz
+    - name: stern
+      url: "https://github.com/stern/stern/releases/download/v{{ versions['stern'] }}/stern_{{ versions['stern'] }}_{{ os }}_{{ arch }}.tar.gz"
       format: tar.gz

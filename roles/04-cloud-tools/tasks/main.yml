@@ -22,7 +22,7 @@
     - gcloud.tar.gz
 
 - name: "Install aws"
-  command: "{{ cloud_tools_path }}/aws/install"
+  command: "{{ cloud_tools_path }}/aws/install --update"
   become: yes
 
 - name: "Install gcloud"
@@ -40,15 +40,8 @@
     - --strip-components=1
 
 - name: "Installing promtool"
-  unarchive:
-    remote_src: yes
-    src: "{{ cloud_tools_path }}/archives/promtool.tar.gz"
-    dest: "{{ cloud_tools_path }}/"
-    include:
-      - "prometheus-{{ versions['promtool'] }}.{{ os }}-{{ arch }}/promtool"
-    extra_opts:
-      - --strip-components=1
-      -
+  command: "tar -zxf {{ cloud_tools_path }}/archives/promtool.tar.gz --strip-components=1 -C {{ cloud_tools_path }} prometheus-{{ versions['promtool'] }}.{{ os }}-{{ arch }}/promtool"
+
 - name: "Installing amtool"
   unarchive:
     remote_src: yes
@@ -73,7 +66,18 @@
     - rbac-lookup
     - dive
     - steampipe
+    - stern
+
+- name: "Installing simple zip archives"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/{{ item }}.zip"
+    dest: "{{ cloud_tools_path }}/"
+  loop:
     - logcli
+
+- name: "Moving logcli"
+  command: "mv {{ cloud_tools_path }}/logcli-{{ os }}-{{ arch }} {{ cloud_tools_path }}/logcli"
 
 - name: "Create a dir for kubeps1"
   file: path={{ cloud_tools_path }}/archives/kubeps1 state=directory mode=0755
