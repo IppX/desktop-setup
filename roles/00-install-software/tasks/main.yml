@@ -17,8 +17,6 @@
 - name: "Getting deb packages"
   get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0644 timeout=20
   with_items:
-    - url: https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb
-      dest: /tmp/nordvpn.deb
     - url: https://downloads.slack-edge.com/linux_releases/slack-desktop-4.4.2-amd64.deb
       dest: /tmp/slack.deb
 
@@ -26,7 +24,6 @@
   apt: deb={{ item }} state=present
   with_items:
     - /tmp/slack.deb
-    - /tmp/nordvpn.deb
 
 - name: "Installing core packages"
   apt: pkg={{ packages }} state=present update_cache=yes
@@ -42,57 +39,11 @@
     - python-psutil
     - rlwrap
 
-    # must have
-    - git
-    - vim
-    - jq
-    - nmap
-    - wireshark
-
     # backup
     - backintime-common
     - backintime-qt4
 
-    # java
-    - openjdk-11-jdk
-    - maven
-    - gradle
-  
-    # php
-    - php-cli
-  
-    # python
-    - python3
-    - python3-pip
-    - python3-venv
-    - python3-setuptools
-  
-    # virtualization
-    - virtualbox
-    - virtualbox-guest-additions-iso
-    - virtualbox-qt
-    - vagrant 
-      
-    # docker
-    - docker-ce 
-    - docker-ce-cli 
-    - containerd.io
-  
-    # other apps
+      # other apps
     - spotify-client
     - vlc
-    - nordvpn
-
-- name: "Installing more binaries"
-  get_url: url={{ item['url'] }} dest={{ item['dest'] }} mode=0755
-  with_items:
-  - url: https://cht.sh/:cht.sh
-    dest: /usr/local/bin/cht.sh
-  - url: https://github.com/docker/compose/releases/download/1.25.5/docker-compose-Linux-x86_64
-    dest: /usr/local/bin/docker-compose 
-
-- name: "Create Docker group"
-  group: name=docker state=present
-
-- name: "Add current user to Docker group"
-  user: name="{{ ansible_env['USER'] }}" groups=docker append=yes
+    - slack-desktop

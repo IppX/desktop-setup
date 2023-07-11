@@ -12,11 +12,18 @@
   get_url: url={{ item['url'] }} dest={{ cloud_tools_path }}/archives/{{ item['name'] }}.{{ item['format'] }} mode=0644 checksum={{ item['checksum']|default('') }} force=yes
   loop: "{{ tools['archives'] }}"
 
-- name: "Unarchive gcloud"
+- name: "Unarchive cloud sdk"
   unarchive:
     remote_src: yes
-    src: "{{ cloud_tools_path }}/archives/gcloud.tar.gz"
+    src: "{{ cloud_tools_path }}/archives/{{ item }}"
     dest: "{{ cloud_tools_path }}/"
+  loop:
+    - aws.zip
+    - gcloud.tar.gz
+
+- name: "Install aws"
+  command: "{{ cloud_tools_path }}/aws/install --update"
+  become: yes
 
 - name: "Install gcloud"
   command: "{{ cloud_tools_path }}/google-cloud-sdk/install.sh --usage-reporting=true --path-update=true --bash-completion=true --rc-path={{ ansible_env['HOME'] }}/.bash_profile --additional-components app alpha beta"
@@ -27,25 +34,50 @@
     src: "{{ cloud_tools_path }}/archives/helm.tar.gz"
     dest: "{{ cloud_tools_path }}/"
     exclude:
-    - "{{ os }}-amd64/LICENSE"
-    - "{{ os }}-amd64/README.md"
+    - "{{ os }}-{{ arch }}/LICENSE"
+    - "{{ os }}-{{ arch }}/README.md"
     extra_opts:
     - --strip-components=1
 
-- name: "Create a dir for kubectx"
-  file: path={{ cloud_tools_path }}/archives/kubectx state=directory mode=0755
+- name: "Installing promtool"
+  command: "tar -zxf {{ cloud_tools_path }}/archives/promtool.tar.gz --strip-components=1 -C {{ cloud_tools_path }} prometheus-{{ versions['promtool'] }}.{{ os }}-{{ arch }}/promtool"
 
-- name: "Unarchive kubectx"
+- name: "Installing amtool"
   unarchive:
     remote_src: yes
-    src: "{{ cloud_tools_path }}/archives/kubectx.tar.gz"
-    dest: "{{ cloud_tools_path }}/archives/kubectx"
-    mode: 0755
+    src: "{{ cloud_tools_path }}/archives/amtool.tar.gz"
+    dest: "{{ cloud_tools_path }}/"
+    include:
+      - "alertmanager-{{ versions['amtool'] }}.{{ os }}-{{ arch }}/amtool"
     extra_opts:
       - --strip-components=1
 
-- name: "Extract kubectx binaries"
-  command: mv {{ cloud_tools_path }}/archives/kubectx/kubectx {{ cloud_tools_path }}/archives/kubectx/kubens {{ cloud_tools_path }}/
+- name: "Installing simple archives"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/{{ item }}.tar.gz"
+    dest: "{{ cloud_tools_path }}/"
+    exclude:
+    - "LICENSE"
+    - "README.md"
+    - "CHANGELOG.md"
+  loop:
+    - hugo
+    - rbac-lookup
+    - dive
+    - steampipe
+    - stern
+
+- name: "Installing simple zip archives"
+  unarchive:
+    remote_src: yes
+    src: "{{ cloud_tools_path }}/archives/{{ item }}.zip"
+    dest: "{{ cloud_tools_path }}/"
+  loop:
+    - logcli
+
+- name: "Moving logcli"
+  command: "mv {{ cloud_tools_path }}/logcli-{{ os }}-{{ arch }} {{ cloud_tools_path }}/logcli"
 
 - name: "Create a dir for kubeps1"
   file: path={{ cloud_tools_path }}/archives/kubeps1 state=directory mode=0755
@@ -71,14 +103,7 @@
     dest: "{{ cloud_tools_path }}/"
     mode: 0755
 
-- name: "Installing terraform"
-  unarchive:
-    remote_src: yes
-    src: "{{ cloud_tools_path }}/archives/terraform.zip"
-    dest: "{{ cloud_tools_path }}/"
-    mode: 0755
-
-- name: "Update bashprofile"
+- name: "Update bash profile"
   blockinfile:
     path: "{{ ansible_env['HOME'] }}/.bash_profile"
     block: |
@@ -89,6 +114,43 @@
 
 - name: "Cleanup archives"
   file: path={{ cloud_tools_path }}/archives state=absent
+
+- name: "Install *env tools"
+  args:
+    executable: /bin/bash
+  shell: |
+    git clone https://github.com/tfutils/tfenv.git {{ ansible_env['HOME'] }}/.tfenv
+    git clone https://github.com/syndbg/goenv.git {{ ansible_env['HOME'] }}/.goenv
+    git clone https://github.com/pyenv/pyenv.git {{ ansible_env['HOME'] }}/.pyenv
+    git clone https://github.com/pyenv/pyenv-virtualenv.git {{ ansible_env['HOME'] }}/.pyenv/plugins/pyenv-virtualenv
+
+- name: "Update bash profile"
+  blockinfile:
+    path: "{{ ansible_env['HOME'] }}/.bash_profile"
+    block: |
+      export PATH="$HOME/.tfenv/bin:$PATH"
+      
+      export GOENV_ROOT="$HOME/.goenv"
+      export PATH="$GOENV_ROOT/bin:$PATH"
+      eval "$(goenv init -)"
+      export PATH="$GOROOT/bin:$PATH"
+      export PATH="$PATH:$GOPATH/bin"
+      
+      export PYENV_ROOT="$HOME/.pyenv"
+      export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init -)"
+      eval "$(pyenv virtualenv-init -)"
+
+    marker_begin: "VIRTENV BEGIN"
+    marker_end: "VIRTENV END"
+
+- name: "Install steampipe plugins"
+  args:
+    executable: /bin/bash
+  shell: |
+    steampipe plugin install aws
+    git clone https://github.com/turbot/steampipe-mod-aws-insights {{ ansible_env['HOME'] }}/github
+
 
 - name: "Install bash completions"
   become: yes
